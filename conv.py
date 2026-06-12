@@ -58,7 +58,8 @@ def inter_mode():
                         convert_to = "ico"
                     else:
                         print("No valid format flag found!")
-                        exit()
+                        sys.exit(1)
+
                     for img_file in os.listdir(images_in_folder):
                         if img_file.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
                             full_path = os.path.join(images_in_folder, img_file)
@@ -73,7 +74,8 @@ def inter_mode():
         elif "-png" in raw_input:
             if ".png" in raw_input and "-jpeg" in raw_input:
                 print("You can't convert png to jpeg, you can try -webp instead.")
-                exit()
+                sys.exit(1)
+
             PNG = "png"
             conversion(image_name, Format=PNG, copy_timestamps="-t" in raw_input)
         elif "-webp" in raw_input:
@@ -133,7 +135,7 @@ def cli_mode():
             conversion(path, "jpeg", copy_timestamps=args.timestamps)
     else:
         print("No valid format flag found! Use -webp, -png, or -jpg.")
-        exit()
+        sys.exit(1)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
