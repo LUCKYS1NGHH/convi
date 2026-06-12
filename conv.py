@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, sys
+import os, sys, subprocess
 from PIL import Image
 import platform
 import ctypes
@@ -93,20 +93,48 @@ def get_args():
     parser.add_argument("-png", action="store_true", help="png image format")
     parser.add_argument("-jpg", action="store_true", help="jpg image format")
     parser.add_argument("-t", "--timestamps", action="store_true", help="inherit the timestamps from original image to compressed.")
+    parser.add_argument("-l", "--lastimg", action="store_true", help="Auto greps the recent image of give dir.")
     return parser.parse_args()
 
 def cli_mode():
     if any(flag in sys.argv for flag in ("-webp", "--webp", "-png", "--png", "-jpg", "--jpg")):
         args = get_args()
+
+        path = args.path
+
+        if not os.path.exists(path):
+            print("Path doesn't exists.")
+            sys.exit(1)
+
+        if args.lastimg:
+            if not os.path.isdir(args.path):
+                print("Directory need for the recent image.")
+                sys.exit(1)
+
+            cmd = (
+            'find "$(pwd)" -maxdepth 1 -type f '
+            '\\( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \\) '
+            '-printf "%T@ %p\\n" | sort -rn | head -1 | cut -d" " -f2-'
+            )
+
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=args.path)
+            path = result.stdout.strip() # latest file
+            print(f"Grepped the recent image {path}")
+
+        if not os.path.isfile(path):
+            print("It's a directory.")
+            sys.exit(1)
+
         if args.webp:
-            conversion(args.path, "webp", copy_timestamps=args.timestamps)
+            conversion(path, "webp", copy_timestamps=args.timestamps)
         elif args.png:
-            conversion(args.path, "png", copy_timestamps=args.timestamps)
+            conversion(path, "png", copy_timestamps=args.timestamps)
         elif args.jpg:
-            conversion(args.path, "jpeg", copy_timestamps=args.timestamps)
+            conversion(path, "jpeg", copy_timestamps=args.timestamps)
     else:
         print("No valid format flag found! Use -webp, -png, or -jpg.")
         exit()
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         cli_mode()
