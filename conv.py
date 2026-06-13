@@ -90,16 +90,16 @@ def inter_mode():
 def get_args():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--path", required=True, help="image path")
-    parser.add_argument("-webp", action="store_true", help="webp image format")
-    parser.add_argument("-png", action="store_true", help="png image format")
-    parser.add_argument("-jpg", action="store_true", help="jpg image format")
-    parser.add_argument("-t", "--timestamps", action="store_true", help="inherit the timestamps from original image to compressed.")
+    parser.add_argument("-P", "--path", required=True, help="Image path")
+    parser.add_argument("-w", "--webp",  action="store_true", help="Webp image format")
+    parser.add_argument("-p", "--png", action="store_true", help="Png image format")
+    parser.add_argument("-j", "--jpg", action="store_true", help="Jpeg image format")
+    parser.add_argument("-t", "--timestamps", action="store_true", help="Inherit the timestamps from original to converted image.")
     parser.add_argument("-l", "--lastimg", action="store_true", help="Auto greps the recent image of give dir.")
     return parser.parse_args()
 
 def cli_mode():
-    if any(flag in sys.argv for flag in ("-webp", "--webp", "-png", "--png", "-jpg", "--jpg")):
+    if any(flag in sys.argv for flag in ("-w", "--webp", "-p", "--png", "-j", "--jpg")):
         args = get_args()
 
         path = args.path
@@ -134,7 +134,7 @@ def cli_mode():
         elif args.jpg:
             conversion(path, "jpeg", copy_timestamps=args.timestamps)
     else:
-        print("No valid format flag found! Use -webp, -png, or -jpg.")
+        print("No valid format flag found!")
         sys.exit(1)
 
 if __name__ == "__main__":
