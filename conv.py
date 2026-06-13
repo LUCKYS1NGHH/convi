@@ -11,20 +11,20 @@ def get_timestamps(file):
 def set_timestamps(target, modified, access):
     os.utime(target, (modified, access))
 
-def conversion(image_path, Format, copy_timestamps=False):
-    print("Converting...")
-    print("-"*20)
+def conversion(image_path, Format, copy_timestamps=False, verbose=True):
     img = Image.open(image_path)
     original_image = os.path.splitext(image_path)[0]
     converted_image = original_image + f".{Format}"
     img.save(converted_image, Format)
     converted_size = os.path.getsize(converted_image)
     original_size = os.path.getsize(image_path)
-    print(f"Image Converted!\n{converted_image}")
-    print(f"Original Size: {original_size/1024:.2f}KB")
-    print(f"Converted Size: {converted_size/1024:.2f}KB")
+    if verbose:
+        print(f"\n{converted_image}")
+        print(f"Original Size: {original_size/1024:.2f}KB")
+        print(f"Converted Size: {converted_size/1024:.2f}KB")
     if copy_timestamps:
-        print("Timestamps Copied!")
+        if verbose:
+            print("Timestamps Copied!")
         set_timestamps(converted_image, *get_timestamps(image_path))
 
 def inter_mode():
@@ -92,6 +92,7 @@ def get_args():
     parser.add_argument("-j", "--jpg", action="store_true", help="Jpeg image format")
     parser.add_argument("-t", "--timestamps", action="store_true", help="Inherit the file timestamps (only modified and accessed) from original to converted image.")
     parser.add_argument("-l", "--lastimg", action="store_true", help="Auto greps the recent image (by modification date) of given directory.")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 def cli_mode():
@@ -123,11 +124,11 @@ def cli_mode():
             sys.exit(1)
 
         if args.webp:
-            conversion(path, "webp", copy_timestamps=args.timestamps)
+            conversion(path, "webp", copy_timestamps=args.timestamps, verbose=args.verbose)
         elif args.png:
-            conversion(path, "png", copy_timestamps=args.timestamps)
+            conversion(path, "png", copy_timestamps=args.timestamps, verbose=args.verbose)
         elif args.jpg:
-            conversion(path, "jpeg", copy_timestamps=args.timestamps)
+            conversion(path, "jpeg", copy_timestamps=args.timestamps, verbose=args.verbose)
     else:
         print("No valid format flag found.")
         sys.exit(1)
