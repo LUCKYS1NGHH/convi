@@ -21,7 +21,7 @@ def set_timestamps(target, created, modified):
 
 def conversion(image_path, Format, copy_timestamps=False):
     print("Converting...")
-    print("----------------")
+    print("-"*20)
     img = Image.open(image_path)
     original_image = os.path.splitext(image_path)[0]
     converted_image = original_image + f".{Format}"
@@ -36,10 +36,14 @@ def conversion(image_path, Format, copy_timestamps=False):
         set_timestamps(converted_image, *get_timestamps(image_path))
 
 def inter_mode():
-    choice = input("1. Batch Images Compression\n2. Single Image Compression\nChoose(1/2): ")
+    print(
+    "\n[1] Batch Image Compression",
+    "\n[2] Single Image Compression",
+    )
+    choice = input("\nChoose (1/2): ")
 
     if choice == "1":
-        images_in_folder = input("Enter the image folder to conversion: ")
+        images_in_folder = input("Enter the image directory for conversion: ")
         flag = input("Enter the flag: ").lower()
         image_name = flag
         if os.path.exists(images_in_folder):
@@ -48,13 +52,13 @@ def inter_mode():
                 print(PURPLE_TEXT,img,RESET)
             if img.endswith((".jpg", ".png", ".jpeg", ".webp")):
                     convert_to = None
-                    if "-jpeg" in flag or "-jpg" in flag:
+                    if "--jpeg" in flag or "--jpg" in flag:
                         convert_to = "jpeg"
-                    elif "-png" in flag:
+                    elif "--png" in flag:
                         convert_to = "png"
-                    elif "-webp" in flag:
+                    elif "--webp" in flag:
                         convert_to = "webp"
-                    elif "-ico" in flag:
+                    elif "--ico" in flag:
                         convert_to = "ico"
                     else:
                         print("No valid format flag found!")
@@ -68,20 +72,19 @@ def inter_mode():
         image_name = input("Enter Image Name and Flags: ").strip().split() # -jpeg, -png, -webp flags for image conversion and -t for copying timestamps
         raw_input = image_name
         image_name = image_name[0]
-        if "-jpeg" in raw_input or "-jpg" in raw_input:
+        if "--jpeg" in raw_input or "--jpg" in raw_input:
             JPG = "jpeg"
             conversion(image_name, Format=JPG, copy_timestamps="-t" in raw_input)
-        elif "-png" in raw_input:
-            if ".png" in raw_input and "-jpeg" in raw_input:
+        elif "--png" in raw_input:
+            if ".png" in raw_input and "--jpeg" in raw_input:
                 print("You can't convert png to jpeg, you can try -webp instead.")
                 sys.exit(1)
-
             PNG = "png"
             conversion(image_name, Format=PNG, copy_timestamps="-t" in raw_input)
-        elif "-webp" in raw_input:
+        elif "--webp" in raw_input:
             WEBP = "webp"
             conversion(image_name, Format=WEBP, copy_timestamps="-t" in raw_input)
-        elif "-ico" in  raw_input:
+        elif "--ico" in  raw_input:
             ICO = "ico"
             conversion(image_name, Format=ICO, copy_timestamps="-t" in raw_input)
         else:
@@ -91,17 +94,16 @@ def get_args():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("-P", "--path", required=True, help="Image path")
-    parser.add_argument("-w", "--webp",  action="store_true", help="Webp image format")
+    parser.add_argument("-w", "--webp", action="store_true", help="Webp image format")
     parser.add_argument("-p", "--png", action="store_true", help="Png image format")
     parser.add_argument("-j", "--jpg", action="store_true", help="Jpeg image format")
-    parser.add_argument("-t", "--timestamps", action="store_true", help="Inherit the timestamps from original to converted image.")
-    parser.add_argument("-l", "--lastimg", action="store_true", help="Auto greps the recent image of give dir.")
+    parser.add_argument("-t", "--timestamps", action="store_true", help="Inherit the file timestamps (only modified) from original to converted image.")
+    parser.add_argument("-l", "--lastimg", action="store_true", help="Auto greps the recent image of given directory.")
     return parser.parse_args()
 
 def cli_mode():
+    args = get_args()
     if any(flag in sys.argv for flag in ("-w", "--webp", "-p", "--png", "-j", "--jpg")):
-        args = get_args()
-
         path = args.path
 
         if not os.path.exists(path):
