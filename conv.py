@@ -1,23 +1,15 @@
 #!/usr/bin/env python3
 import os, sys, subprocess
 from PIL import Image
-import platform
-import ctypes
 
 PURPLE_TEXT = "\33[95m"
 RESET = "\33[0m"
 
 def get_timestamps(file):
-    return os.path.getctime(file), os.path.getmtime(file)
+    return os.path.getmtime(file), os.path.getctime(file)
 
-def set_timestamps(target, created, modified):
-    if platform.system() == "Windows":
-        FILETIME = ctypes.c_ulonglong
-        handle = ctypes.windll.kernel32.CreateFileW(target, 256, 0, None, 3, 128, None)
-        if handle != -1:
-            ctypes.windll.kernel32.SetFileTime(handle, ctypes.byref(FILETIME(int(created * 1e7) + 116444736000000000)), None, None)
-            ctypes.windll.kernel32.CloseHandle(handle)
-    os.utime(target, (modified, modified))
+def set_timestamps(target, modified, access):
+    os.utime(target, (modified, access))
 
 def conversion(image_path, Format, copy_timestamps=False):
     print("Converting...")
@@ -61,7 +53,7 @@ def inter_mode():
                     elif "--ico" in flag:
                         convert_to = "ico"
                     else:
-                        print("No valid format flag found!")
+                        print("No valid format flag found.")
                         sys.exit(1)
 
                     for img_file in os.listdir(images_in_folder):
@@ -69,7 +61,8 @@ def inter_mode():
                             full_path = os.path.join(images_in_folder, img_file)
                             conversion(full_path, convert_to, copy_timestamps="-t" in flag)
     else:
-        image_name = input("Enter Image Name and Flags: ").strip().split() # -jpeg, -png, -webp flags for image conversion and -t for copying timestamps
+        # --jpeg, --png, --webp flags for img conversion & -t for timestamps copy
+        image_name = input("Enter Image Name and Flags: ").strip().split()
         raw_input = image_name
         image_name = image_name[0]
         if "--jpeg" in raw_input or "--jpg" in raw_input:
@@ -77,7 +70,7 @@ def inter_mode():
             conversion(image_name, Format=JPG, copy_timestamps="-t" in raw_input)
         elif "--png" in raw_input:
             if ".png" in raw_input and "--jpeg" in raw_input:
-                print("You can't convert png to jpeg, you can try -webp instead.")
+                print("You can't convert png to jpeg, you can try --webp instead.")
                 sys.exit(1)
             PNG = "png"
             conversion(image_name, Format=PNG, copy_timestamps="-t" in raw_input)
@@ -97,8 +90,8 @@ def get_args():
     parser.add_argument("-w", "--webp", action="store_true", help="Webp image format")
     parser.add_argument("-p", "--png", action="store_true", help="Png image format")
     parser.add_argument("-j", "--jpg", action="store_true", help="Jpeg image format")
-    parser.add_argument("-t", "--timestamps", action="store_true", help="Inherit the file timestamps (only modified) from original to converted image.")
-    parser.add_argument("-l", "--lastimg", action="store_true", help="Auto greps the recent image of given directory.")
+    parser.add_argument("-t", "--timestamps", action="store_true", help="Inherit the file timestamps (only modified and accessed) from original to converted image.")
+    parser.add_argument("-l", "--lastimg", action="store_true", help="Auto greps the recent image (by modification date) of given directory.")
     return parser.parse_args()
 
 def cli_mode():
@@ -136,7 +129,7 @@ def cli_mode():
         elif args.jpg:
             conversion(path, "jpeg", copy_timestamps=args.timestamps)
     else:
-        print("No valid format flag found!")
+        print("No valid format flag found.")
         sys.exit(1)
 
 if __name__ == "__main__":
