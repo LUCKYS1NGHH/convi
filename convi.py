@@ -27,62 +27,6 @@ def conversion(image_path, Format, copy_timestamps=False, verbose=True):
             print("Timestamps Copied!")
         set_timestamps(converted_image, *get_timestamps(image_path))
 
-def inter_mode():
-    print(
-    "\n[1] Batch Image Compression",
-    "\n[2] Single Image Compression",
-    )
-    choice = input("\nChoose (1/2): ")
-
-    if choice == "1":
-        images_in_folder = input("Enter the image directory for conversion: ")
-        flag = input("Enter the flag: ").lower()
-        image_name = flag
-        if os.path.exists(images_in_folder):
-            imgs = os.listdir(images_in_folder)
-            for img in imgs:
-                print(PURPLE_TEXT,img,RESET)
-            if img.endswith((".jpg", ".png", ".jpeg", ".webp")):
-                    convert_to = None
-                    if "--jpeg" in flag or "--jpg" in flag:
-                        convert_to = "jpeg"
-                    elif "--png" in flag:
-                        convert_to = "png"
-                    elif "--webp" in flag:
-                        convert_to = "webp"
-                    elif "--ico" in flag:
-                        convert_to = "ico"
-                    else:
-                        print("No valid format flag found.")
-                        sys.exit(1)
-
-                    for img_file in os.listdir(images_in_folder):
-                        if img_file.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
-                            full_path = os.path.join(images_in_folder, img_file)
-                            conversion(full_path, convert_to, copy_timestamps="-t" in flag)
-    else:
-        # --jpeg, --png, --webp flags for img conversion & -t for timestamps copy
-        image_name = input("Enter Image Name and Flags: ").strip().split()
-        raw_input = image_name
-        image_name = image_name[0]
-        if "--jpeg" in raw_input or "--jpg" in raw_input:
-            JPG = "jpeg"
-            conversion(image_name, Format=JPG, copy_timestamps="-t" in raw_input)
-        elif "--png" in raw_input:
-            if ".png" in raw_input and "--jpeg" in raw_input:
-                print("You can't convert png to jpeg, you can try --webp instead.")
-                sys.exit(1)
-            PNG = "png"
-            conversion(image_name, Format=PNG, copy_timestamps="-t" in raw_input)
-        elif "--webp" in raw_input:
-            WEBP = "webp"
-            conversion(image_name, Format=WEBP, copy_timestamps="-t" in raw_input)
-        elif "--ico" in  raw_input:
-            ICO = "ico"
-            conversion(image_name, Format=ICO, copy_timestamps="-t" in raw_input)
-        else:
-            print("IT SUCKED!")
-
 def get_args():
     import argparse
     parser = argparse.ArgumentParser()
@@ -95,7 +39,7 @@ def get_args():
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
-def cli_mode():
+def main():
     args = get_args()
     if any(flag in sys.argv for flag in ("-w", "--webp", "-p", "--png", "-j", "--jpg")):
         path = args.path
@@ -134,7 +78,4 @@ def cli_mode():
         sys.exit(1)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        cli_mode()
-    else:
-        inter_mode()
+    main()
