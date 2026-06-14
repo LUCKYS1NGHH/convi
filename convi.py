@@ -7,16 +7,23 @@ PURPLE = "\33[35m"
 RESET = "\33[0m"
 
 def get_timestamps(file):
+    # get modified and accessed time
     return os.path.getmtime(file), os.path.getctime(file)
 
 def set_timestamps(target, modified, access):
+    # set modified and accessed time
     os.utime(target, (modified, access))
 
 def conversion(image_path, Format, copy_timestamps=False, verbose=True):
+    """Convert the image to given format and show the result if verbose"""
     img = Image.open(image_path)
+
+    # add given format in the converted image filename
     original_image = os.path.splitext(image_path)[0]
     converted_image = original_image + f".{Format}"
+
     img.save(converted_image, Format)
+
     if verbose:
         print(f"\n{PURPLE}{converted_image}{RESET}")
         print(f"Original  : {os.path.getsize(image_path)/1024:.2f}KB")
@@ -44,6 +51,7 @@ def main():
 
         files = args.path
 
+        # iterate multiple files (for *, ?, [] etc.)
         for path in files:
             if not os.path.exists(path):
                 print("Path doesn't exists.")
@@ -54,6 +62,7 @@ def main():
                     print("Directory need for the recent image.")
                     sys.exit(20)
 
+                # command for getting the last image filename by modtime from the directory (YES, looks ugly but works)
                 cmd = (
                 'find "$(pwd)" -maxdepth 1 -type f '
                 '\\( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \\) '
@@ -68,6 +77,7 @@ def main():
                 print("It's a directory.")
                 sys.exit(21)
 
+            # image format according flag argument
             if args.webp:
                 target_format = "webp"
             elif args.png:
@@ -82,3 +92,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# A simple CLI tool for converting image file formats
+# By LUCKYS1NGHH (or LUCKY)
+# Official Repository URL: https://github.com/LUCKYS1NGHH/convi
+# LICENSE: GPLv3
+
