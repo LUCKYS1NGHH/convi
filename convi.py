@@ -49,12 +49,12 @@ def main():
         for path in files:
             if not os.path.exists(path):
                 print("Path doesn't exists.")
-                sys.exit(1)
+                sys.exit(2)
 
             if args.lastimg:
                 if not os.path.isdir(path):
                     print("Directory need for the recent image.")
-                    sys.exit(1)
+                    sys.exit(20)
 
                 cmd = (
                 'find "$(pwd)" -maxdepth 1 -type f '
@@ -68,7 +68,7 @@ def main():
 
             if not os.path.isfile(path):
                 print("It's a directory.")
-                sys.exit(1)
+                sys.exit(21)
 
             if args.webp:
                 conversion(path, "webp", copy_timestamps=args.timestamps, verbose=args.verbose)
@@ -78,7 +78,7 @@ def main():
                 conversion(path, "jpeg", copy_timestamps=args.timestamps, verbose=args.verbose)
     else:
         print("No valid format flag found.")
-        sys.exit(1)
+        sys.exit(64)
 
 if __name__ == "__main__":
     main()
