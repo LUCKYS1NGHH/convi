@@ -2,7 +2,8 @@
 import os, sys, subprocess
 from PIL import Image
 
-PURPLE_TEXT = "\33[95m"
+BLUE = "\33[34m"
+PURPLE = "\33[35m"
 RESET = "\33[0m"
 
 def get_timestamps(file):
@@ -19,12 +20,12 @@ def conversion(image_path, Format, copy_timestamps=False, verbose=True):
     converted_size = os.path.getsize(converted_image)
     original_size = os.path.getsize(image_path)
     if verbose:
-        print(f"\n{converted_image}")
-        print(f"Original Size: {original_size/1024:.2f}KB")
-        print(f"Converted Size: {converted_size/1024:.2f}KB")
+        print(f"\n{PURPLE}{converted_image}{RESET}")
+        print(f"Original  : {original_size/1024:.2f}KB")
+        print(f"Converted : {converted_size/1024:.2f}KB")
     if copy_timestamps:
         if verbose:
-            print("Timestamps Copied!")
+            print(f"{BLUE}Timestamps Inherited{RESET}")
         set_timestamps(converted_image, *get_timestamps(image_path))
 
 def get_args():
@@ -63,7 +64,7 @@ def main():
 
                 result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=path)
                 path = result.stdout.strip() # latest file
-                print(f"Grepped the recent image {path}")
+                print(f"\n{BLUE}Grepped the recent image{RESET} {path}")
 
             if not os.path.isfile(path):
                 print("It's a directory.")
