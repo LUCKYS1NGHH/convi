@@ -30,7 +30,7 @@ def conversion(image_path, Format, copy_timestamps=False, verbose=True):
 def get_args():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("-P", "--path", required=True, help="Image path")
+    parser.add_argument("-P", "--path", required=True, nargs="+", help="Image path")
     parser.add_argument("-w", "--webp", action="store_true", help="Webp image format")
     parser.add_argument("-p", "--png", action="store_true", help="Png image format")
     parser.add_argument("-j", "--jpg", action="store_true", help="Jpeg image format")
@@ -42,37 +42,39 @@ def get_args():
 def main():
     args = get_args()
     if any(flag in sys.argv for flag in ("-w", "--webp", "-p", "--png", "-j", "--jpg")):
-        path = args.path
 
-        if not os.path.exists(path):
-            print("Path doesn't exists.")
-            sys.exit(1)
+        files = args.path
 
-        if args.lastimg:
-            if not os.path.isdir(args.path):
-                print("Directory need for the recent image.")
+        for path in files:
+            if not os.path.exists(path):
+                print("Path doesn't exists.")
                 sys.exit(1)
 
-            cmd = (
-            'find "$(pwd)" -maxdepth 1 -type f '
-            '\\( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \\) '
-            '-printf "%T@ %p\\n" | sort -rn | head -1 | cut -d" " -f2-'
-            )
+            if args.lastimg:
+                if not os.path.isdir(path):
+                    print("Directory need for the recent image.")
+                    sys.exit(1)
 
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=args.path)
-            path = result.stdout.strip() # latest file
-            print(f"Grepped the recent image {path}")
+                cmd = (
+                'find "$(pwd)" -maxdepth 1 -type f '
+                '\\( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \\) '
+                '-printf "%T@ %p\\n" | sort -rn | head -1 | cut -d" " -f2-'
+                )
 
-        if not os.path.isfile(path):
-            print("It's a directory.")
-            sys.exit(1)
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=path)
+                path = result.stdout.strip() # latest file
+                print(f"Grepped the recent image {path}")
 
-        if args.webp:
-            conversion(path, "webp", copy_timestamps=args.timestamps, verbose=args.verbose)
-        elif args.png:
-            conversion(path, "png", copy_timestamps=args.timestamps, verbose=args.verbose)
-        elif args.jpg:
-            conversion(path, "jpeg", copy_timestamps=args.timestamps, verbose=args.verbose)
+            if not os.path.isfile(path):
+                print("It's a directory.")
+                sys.exit(1)
+
+            if args.webp:
+                conversion(path, "webp", copy_timestamps=args.timestamps, verbose=args.verbose)
+            elif args.png:
+                conversion(path, "png", copy_timestamps=args.timestamps, verbose=args.verbose)
+            elif args.jpg:
+                conversion(path, "jpeg", copy_timestamps=args.timestamps, verbose=args.verbose)
     else:
         print("No valid format flag found.")
         sys.exit(1)
