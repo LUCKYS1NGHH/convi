@@ -21,10 +21,24 @@ options:
 
 ## Install
 
+### System-wide (recommend)
+
 ```bash
 git clone --depth=1 https://github.com/LUCKYS1NGHH/convi.git
-sudo cp convi/convi.py /usr/local/bin/convi # for only your user account, replace /usr/local/bin with $HOME/.local/bin
+sudo cp convi/convi.py /usr/local/bin/convi
+sudo chmod 755 /usr/local/bin/convi
 ```
+
+### For only your user account
+
+```bash
+git clone --depth=1 https://github.com/LUCKYS1NGHH/convi.git
+cp convi/convi.py $HOME/.local/bin/convi
+chmod +x $HOME/.local/bin/convi
+```
+
+> [!NOTE]
+> Make sure for your user account, $HOME/.local/bin directory exists and is in your $PATH.
 
 ## Dependencies
 
