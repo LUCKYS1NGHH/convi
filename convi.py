@@ -17,12 +17,10 @@ def conversion(image_path, Format, copy_timestamps=False, verbose=True):
     original_image = os.path.splitext(image_path)[0]
     converted_image = original_image + f".{Format}"
     img.save(converted_image, Format)
-    converted_size = os.path.getsize(converted_image)
-    original_size = os.path.getsize(image_path)
     if verbose:
         print(f"\n{PURPLE}{converted_image}{RESET}")
-        print(f"Original  : {original_size/1024:.2f}KB")
-        print(f"Converted : {converted_size/1024:.2f}KB")
+        print(f"Original  : {os.path.getsize(image_path)/1024:.2f}KB")
+        print(f"Converted : {os.path.getsize(converted_image)/1024:.2f}KB")
     if copy_timestamps:
         if verbose:
             print(f"{BLUE}Timestamps Inherited{RESET}")
@@ -71,11 +69,13 @@ def main():
                 sys.exit(21)
 
             if args.webp:
-                conversion(path, "webp", copy_timestamps=args.timestamps, verbose=args.verbose)
+                target_format = "webp"
             elif args.png:
-                conversion(path, "png", copy_timestamps=args.timestamps, verbose=args.verbose)
+                target_format = "png"
             elif args.jpg:
-                conversion(path, "jpeg", copy_timestamps=args.timestamps, verbose=args.verbose)
+                target_format = "jpeg"
+
+            conversion(path, target_format, copy_timestamps=args.timestamps, verbose=args.verbose)
     else:
         print("No valid format flag found.")
         sys.exit(64)
