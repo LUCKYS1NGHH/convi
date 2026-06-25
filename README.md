@@ -1,6 +1,6 @@
 # Convi
 
-A simple CLI tool for converting image formats to JPEG/PNG/WEBP for GNU/Linux.
+A simple CLI tool for converting images format to Jpeg/Png/Webp in GNU/Linux.
 
 ## Usage
 
@@ -44,11 +44,12 @@ chmod +x $HOME/.local/bin/convi
 
 Requires Python 3 and pillow library.
 
-```
+> Python might be already installed in your system
+
+```bash
 pip install pillow # or install `python-pillow` as system-wide through your package manager
 ```
 
 ## Author
 
 LUCKYS1NGHH / https://github.com/LUCKYS1NGHH
-
