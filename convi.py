@@ -14,16 +14,22 @@ def set_timestamps(target, modified, access):
     # set modified and accessed time
     os.utime(target, (modified, access))
 
-def conversion(image_path, Format, copy_timestamps=False, verbose=True):
+def conversion(image_path, Format, copy_timestamps=False, verbose=True, no_degrade=False):
     """Convert the image to given format and show the result if verbose"""
     img = Image.open(image_path)
-
-    # add given format in the converted image filename
     original_image = os.path.splitext(image_path)[0]
     converted_image = original_image + f".{Format}"
 
-    img.save(converted_image, Format)
+    save_kwargs = {}
+    if no_degrade:
+        if Format == "webp":
+            save_kwargs["lossless"] = True
+        elif Format == "jpeg":
+            save_kwargs["quality"] = 100
+            save_kwargs["subsampling"] = 0
+        # png is lossless by default, so nothing needed
 
+    img.save(converted_image, Format, **save_kwargs)
     if verbose:
         print(f"\n{PURPLE}{converted_image}{RESET}")
         print(f"Original  : {os.path.getsize(image_path)/1024:.2f}KB")
@@ -43,6 +49,7 @@ def get_args():
     parser.add_argument("-t", "--timestamps", action="store_true", help="Inherit the file timestamps (only modified and accessed) from original to converted image.")
     parser.add_argument("-l", "--lastimg", action="store_true", help="Auto greps the recent image (by modification date) of given directory.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument("-L", "--lossless", action="store_true", help="Lossless webp images (quality 100)")
     return parser.parse_args()
 
 def main():
@@ -85,7 +92,7 @@ def main():
             elif args.jpg:
                 target_format = "jpeg"
 
-            conversion(path, target_format, copy_timestamps=args.timestamps, verbose=args.verbose)
+            conversion(path, target_format, copy_timestamps=args.timestamps, verbose=args.verbose, no_degrade=args.lossless)
     else:
         print("No valid format flag found.")
         sys.exit(64)
