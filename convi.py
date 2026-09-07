@@ -14,11 +14,22 @@ def set_timestamps(target, modified, access):
     # set modified and accessed time
     os.utime(target, (modified, access))
 
-def conversion(image_path, Format, copy_timestamps=False, verbose=True, no_degrade=False):
+def resize_image(img, max_size=None):
+    if not max_size:
+        return img
+    w, h = img.size
+    if w <= max_size and h <= max_size:
+        return img
+    ratio = max_size / max(w, h)
+    return img.resize((int(w * ratio), int(h * ratio)), Image.Resampling.LANCZOS)
+
+def conversion(image_path, Format, copy_timestamps=False, verbose=True, no_degrade=False, compress=90, max_size=None):
     """Convert the image to given format and show the result if verbose"""
     img = Image.open(image_path)
     original_image = os.path.splitext(image_path)[0]
     converted_image = original_image + f".{Format}"
+
+    img = resize_image(img, max_size=max_size)
 
     save_kwargs = {}
     if no_degrade:
@@ -28,6 +39,9 @@ def conversion(image_path, Format, copy_timestamps=False, verbose=True, no_degra
             save_kwargs["quality"] = 100
             save_kwargs["subsampling"] = 0
         # png is lossless by default, so nothing needed
+    else:
+        if Format in ("webp", "jpeg"):
+            save_kwargs["quality"] = compress
 
     img.save(converted_image, Format, **save_kwargs)
     if verbose:
@@ -50,6 +64,8 @@ def get_args():
     parser.add_argument("-l", "--lastimg", action="store_true", help="Auto greps the recent image (by modification date) of given directory.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument("-L", "--lossless", action="store_true", help="Lossless webp images (quality 100)")
+    parser.add_argument("-c", "--compress", type=int, default=90, help="Compress the image by number (defualt 90)")
+    parser.add_argument("-s", "--size", type=int, default=None, help="Max pixel size to resize (preserves aspect ratio)")
     return parser.parse_args()
 
 def main():
@@ -92,7 +108,7 @@ def main():
             elif args.jpg:
                 target_format = "jpeg"
 
-            conversion(path, target_format, copy_timestamps=args.timestamps, verbose=args.verbose, no_degrade=args.lossless)
+            conversion(path, target_format, copy_timestamps=args.timestamps, verbose=args.verbose, no_degrade=args.lossless, compress=args.compress, max_size=args.size)
     else:
         print("No valid format flag found.")
         sys.exit(64)
@@ -104,4 +120,3 @@ if __name__ == "__main__":
 # By LUCKYS1NGHH (or LUCKY)
 # Official Repository URL: https://github.com/LUCKYS1NGHH/convi
 # LICENSE: GPLv3
-
